@@ -1,63 +1,123 @@
-import { useState } from "react"
+import { useState, ChangeEvent, FormEvent, Dispatch } from "react"
+import { v4 as uuidv4 } from 'uuid'
+import { Activity } from "../types"
 import { categories } from "../data/categories"
+import { ActivityActions } from "../reducers/activityReducer"
 
-export default function Form() {
-  const [activity, setActivity] = useState({
-    categories: 1,
-    name: '',
-    calories: 0
-  })
+import { Input } from "../components/ui/input"
+import { Label } from "../components/ui/label"
+import { Button } from "../components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "../components/ui/select"
 
-  const handleChange = (e) => {
+type FormProps = {
+  dispatch: Dispatch<ActivityActions>
+  activities: Activity[]
+}
+
+const initialState = {
+  id: uuidv4(),
+  categories: 1,
+  name: '',
+  calories: 0
+}
+
+export default function Form({ dispatch }: FormProps) {
+  const [activity, setActivity] = useState<Activity>(initialState)
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const isNumberField = ['calories'].includes(e.target.id)
+
     setActivity({
       ...activity,
-      [e.target.id]: e.target.value
+      [e.target.id]: isNumberField ? +e.target.value : e.target.value
+    })
+  }
+
+  const handleSelectChange = (value: string) => {
+    setActivity({
+      ...activity,
+      categories: +value
+    })
+  }
+
+  const isValiActivity = () => {
+    const { name, calories } = activity
+    return name.trim() !== '' && calories > 0
+  }
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    dispatch({
+      type: 'save_activity',
+      payload: { newActivity: activity }
+    })
+
+    setActivity({
+      ...initialState,
+      id: uuidv4()
     })
   }
 
   return (
-    <form className='space-y-5 bg-white shadow p-10 rounded-lg'>
-        <div className='grid grid-cols-1 gap-3'>
-            <label htmlFor="categories" className="font-bold">Categoría:</label>
-            <select 
-              id="categories" 
-              className='border border-slate-300 p-2 rounded-lg w-full bg-white'
-              value={activity.categories}
-              onChange={handleChange}
-              
-            >
-              {categories.map(category => (
-          <option key={category.id} value={category.id}>{category.name}</option>
-              ))}
-            </select>
-        </div>
-        <div className='grid grid-cols-1 gap-3'>  
-          <label htmlFor="name" className="font-bold">Actividad:</label>
-          <input 
-            type="text" 
-            id="name" 
-            placeholder='Ej: Comida, Jugo de Naranja, Ensalada, etc.' 
-            className='border border-slate-300 p-2 rounded-lg w-full bg-white'
-            value={activity.name}
-            onChange={handleChange}
-          />
-        </div>
-        <div className='grid grid-cols-1 gap-3'>  
-          <label htmlFor="calories" className="font-bold">Calorias:</label>
-          <input 
-            type="number" 
-            id="calories" 
-            placeholder='Ej: 100, 200, 300, etc.' 
-            className='border border-slate-300 p-2 rounded-lg w-full bg-white'
-            value={activity.calories}
-            onChange={handleChange}
-          />
-        </div>
-        <input 
-          type="submit" 
-          value="Guardar Comida o Guardar Ejercicio" 
-          className="bg-gray-800 hover:bg-gray-900 w-full p-2 text-white font-bold cursor-pointer"
+    <form className="space-y-6 bg-white rounded-lg shadow-lg p-10" onSubmit={handleSubmit}>
+      <div className="grid gap-2">
+        <Label htmlFor="categories" className="flex items-center gap-2">
+          <span>Categoría:</span>
+        </Label>
+        <Select onValueChange={handleSelectChange} value={String(activity.categories)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecciona una categoría" />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            {categories.map(category => (
+              <SelectItem key={category.id} value={String(category.id)}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="name" className="flex items-center gap-2">
+          <span>Actividad:</span>
+        </Label>
+        <Input
+          type="text"
+          id="name"
+          placeholder="Ej: Comida, Jugo de Naranja, Ensalada, etc."
+          value={activity.name}
+          onChange={handleChange}
+          className="border rounded-lg px-3 py-2"
         />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="calories" className="flex items-center gap-2">
+          <span>Calorías:</span>
+        </Label>
+        <Input
+          type="number"
+          id="calories"
+          placeholder="Ej: 100, 200, etc."
+          value={activity.calories}
+          onChange={handleChange}
+          min={activity.categories === 1 ? 0 : 1}
+          max={activity.categories === 1 ? 1000 : 500}
+          className="border rounded-lg px-3 py-2"
+        />
+      </div>
+
+      <Button type="submit" className="w-full bg-lime-600 hover:bg-lime-500 text-white py-2 rounded-lg disabled:bg-gray-400" disabled={!isValiActivity()}>
+        {activity.categories === 1 ? 'Agregar Comida' : 'Agregar Ejercicio'}
+      </Button>
     </form>
   )
 }
