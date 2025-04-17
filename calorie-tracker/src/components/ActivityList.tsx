@@ -2,7 +2,7 @@ import { Activity } from "../types"
 import { Button } from "../components/ui/button"
 import { Card, CardContent } from "../components/ui/card"
 import { Badge } from "../components/ui/badge"
-import { Apple, BikeIcon, Pencil, Trash2 } from 'lucide-react';
+import { Apple, BicepsFlexed, Pencil, Trash2 } from 'lucide-react';
 import { Dispatch, useMemo } from "react";
 import { categories } from "../data/categories";
 import { ActivityActions } from "../reducers/activityReducer";
@@ -25,7 +25,7 @@ export default function ActivityList({ activities, dispatch }: ActivityListProps
 
         {
         isEmptyActivity ? (
-          <p className="text-2xl text-center font-light">No hay actividades aún ....</p>
+          <p className="text-2xl text-center italic">No hay actividades aún ....</p>
         ):
         activities.map((activity) => (
           <Card key={activity.id} className="p-6 flex justify-between items-center shadow-md">
@@ -42,7 +42,7 @@ export default function ActivityList({ activities, dispatch }: ActivityListProps
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <BikeIcon className="h-6 w-6" />
+                      <BicepsFlexed className="h-6 w-6" />
                       <span className="text-lg">Ejercicio</span>
                     </div>
                   )}
