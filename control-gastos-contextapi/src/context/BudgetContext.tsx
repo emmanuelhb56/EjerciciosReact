@@ -21,3 +21,4 @@ export const BudgetProvider = ({ children }: BudgetProviderProps) => {
         </BudgetContext.Provider>
     )
 }
+
