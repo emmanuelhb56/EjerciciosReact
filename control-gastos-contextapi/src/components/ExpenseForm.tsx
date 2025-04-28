@@ -46,14 +46,6 @@ export default function ExpenseForm() {
         return
     }
 
-    const budget = Number(localStorage.getItem('budget'))
-
-    // Validación de Presupuesto
-    if(expense.amount > budget) {
-        setError('El presupuesto es insuficiente')
-        return
-    }
-    
     dispatch({
       type: 'add-expense',
       payload: {
